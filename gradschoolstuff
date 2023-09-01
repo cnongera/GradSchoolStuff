@@ -1,0 +1,125 @@
+#Inquiry to universities
+import csv
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
+def send_email(subject, send_email, message, emailsender, password):
+    msg = MIMEMultipart()
+    msg['From'] = emailsender
+    msg['To'] = send_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, "plain"))
+    formatted_message = msg.as_string()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(emailsender, password)
+        server.sendmail(emailsender, send_email, formatted_message)
+
+def main():
+    #Change these to fit your credentials
+    emailsender = "yourgmail@gmail.com"
+    password = "yourpassowrd"
+    subject = "Inquiry: Does your university accept grades from UoPeople?" #Change the subject to fit your communication
+
+    try:
+        #Change the gradinquiry.csv to fit your grad schools
+        with open('gradschinquiry.csv', 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)  
+            for line in reader:
+                # Customize the message to fit what you want to communicate
+                message = f""" Dear {line[0]},\n Greetings from Kenya, East Africa.
+I do hope that you are keeping safe and healthy.
+I am Clement Ongera, a Kenyan citizen currently studying for the bachelor's in Computer Science at the University of the People (https://www.uopeople.edu/), UoPeople.
+I'm meant to graduate from UoPeople in April 2024. I thought I'd apply for the Master of Science (M.Sc.) in Computer Science for the fall 2024 semester at your university.
+I have one question.
+Given that I have a CGPA of 0.00 currently, does your university accept grades from UoPeople?
+Regards,
+Clement Ongera.
+"""
+                send_email(subject, line[1], message, emailsender, password)
+                print(f"Email sent to {line[0]}, email {line[1]}, of {line[2]} .")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
+
+
+
+#Send emails to UoPeople Professors
+#With attachments.
+import csv
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
+def send_email(subject, send_email, message, emailsender, password, attachment_paths):
+    msg = MIMEMultipart()
+    msg['From'] = emailsender
+    msg['To'] = send_email
+    msg['Subject'] = subject
+
+    # Create the HTML message
+    msg.attach(MIMEText(message, "html"))
+
+    # Attach multiple files
+    for attachment_path in attachment_paths:
+        attachment = open(attachment_path, "rb")
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload((attachment).read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f"attachment; filename={attachment_path.split('/')[-1]}")
+        msg.attach(part)
+
+    formatted_message = msg.as_string()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(emailsender, password)
+        server.sendmail(emailsender, send_email, formatted_message)
+
+def main():
+    #Change these to fit your credentials
+    emailsender = "yourgmail@gmail.com"
+    password = "yourpassowrd"
+    subject = "MSc. Computer Science Recommendation Letter" #Change the subject to fit the program you want to study
+
+    try:
+        #Change the uopeopleprof.csv to fit your grad schools
+        with open('uopeopleprof.csv', 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)  
+            for line in reader:
+                # Customize the message to fit what you want to communicate
+                message = f"""<html> 
+        <head>
+            <title>MSc. Computer Science Recommendation Letter</title>
+        </head>
+        <body>
+            <p>Dear {line[0]},</p>
+            <p>Greetings from Kenya, East Africa.</p>
+            <p>I do hope that you are keeping safe and healthy.</p>
+            <p>I am writing to request your assistance in providing a letter of recommendation for my application to the Master of Science in Computer Science program at 7 universities (I just finished emailing 52 universities and I've so far received 13 positive responses from these universities that do accept undergraduate candidates from UoPeople. Please recommend how many I can apply to).</p>
+            <p>I had the pleasure of taking your {line[2]} course in {line[3]} and was very impressed with your teaching style and knowledge of the material. I learned a great deal from your course, and I believe that your letter of recommendation would be a valuable addition to my application. In addition to your course, I have also taken other courses and have consistently earned high grades.</p>
+            <p>To assist you in composing the letter, I shall send to you as much information required for the specific university as I shall gather, meanwhile, I have attached my CV, a copy of my transcript, and here are my social links; <a href="https://www.linkedin.com/in/cnongera/">LinkedIn</a>, <a href="https://www.polywork.com/cnongera/">Polywork</a>, <a href="https://twitter.com/cnongera/">Twitter</a>, and <a href="https://instagram.com/cnongera/">Instagram</a></p>
+            <p>If there is any advice you can impart, additional information or materials you require, please do not hesitate to let me know. You can reach me on email or my mobile phone +254YYYYY.</p>
+            <p>Thank you for your time and consideration. I am truly grateful for your support and guidance throughout my academic journey. Your recommendation will undoubtedly play a crucial role in helping me achieve my goals in the field of Computer Science.</p>
+            <p>Regards,</p>
+            <p>Clement Ongera.</p>
+        </body>
+        </html>"""
+                # The pdf attachment and/or paths to the pdfs, change as needed
+                pdfattachments = ['Clement Ongera Nyangoya CV 2023.pdf', 'Clement Ongera Nyangoya Transcript July 2023.pdf']
+                
+                send_email(subject, line[1], message, emailsender, password, pdfattachments)
+                print(f"Email sent to {line[0]}, email {line[1]}, instructor of the {line[2]} course.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
